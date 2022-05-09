@@ -9,6 +9,7 @@ Neko runs over the windows. With this variant you can choose to don't transform 
 - C standard library (e.g. glibc)
 - X11 client-side library (libX11)
 - X11 miscellaneous extensions library (libXext)
+- xsetroot
 
 ### Building
 
