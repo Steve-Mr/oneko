@@ -718,7 +718,7 @@ InitScreen(char *DisplayName)
                ExposureMask|VisibilityChangeMask|KeyPressMask);
 
   XFlush(theDisplay);
-  if (FixRootCursor == True && NoCursor == True)
+  if (FixRootCursor == True)
   {
       system("xsetroot -cursor_name left_ptr") ;
   }
@@ -749,7 +749,7 @@ RestoreCursor()
        }
   XFreeCursor(theDisplay,theCursor);
   XCloseDisplay(theDisplay);
-  if (FixRootCursor == True)
+  if (FixRootCursor)
   {
       system("xsetroot -cursor_name left_ptr") ;
   }
