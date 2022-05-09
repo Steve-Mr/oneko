@@ -1,6 +1,6 @@
 # oneko
 
-Neko runs over the windows
+Neko runs over the windows. With this variant you can choose to don't transform the cursor into a mouse. You also have the option to reset the root window mouse pointer, useful if your cursor is an X after closing oneko (you'll need xsetroot installed).
 
 ## Getting Started
 
