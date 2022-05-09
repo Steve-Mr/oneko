@@ -532,9 +532,7 @@ Window SelectWindow(Display *dpy)
   int buttons = 0;
 
   /* Make the target cursor */
-  if (NoCursor == False) {
-    cursor = theCursor;
-  }
+  cursor = theCursor;
 
   /* Grab the pointer using target cursor, letting it room all over */
   status = XGrabPointer(dpy, root, False,
@@ -696,6 +694,7 @@ InitScreen(char *DisplayName)
 
   theWindowAttributes.background_pixel = theBackgroundColor.pixel;
   if (NoCursor == False) {
+    printf("Setting cursor...\n");
     theWindowAttributes.cursor = theCursor;
   }
   theWindowAttributes.override_redirect = True;
@@ -719,6 +718,11 @@ InitScreen(char *DisplayName)
                ExposureMask|VisibilityChangeMask|KeyPressMask);
 
   XFlush(theDisplay);
+  if (FixRootCursor == True && NoCursor == True)
+  {
+      system("xsetroot -cursor_name left_ptr") ;
+  }
+
 }
 
 
