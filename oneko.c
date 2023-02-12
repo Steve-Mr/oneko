@@ -4,6 +4,8 @@
 
 #include "oneko.h"
 #include "patchlevel.h"
+#include <stdlib.h>
+#include <stdio.h>
 
 /*
  *      グローバル変数
@@ -29,6 +31,10 @@ XColor  theForegroundColor;             /* 色 (フォアグラウンド) */
 XColor  theBackgroundColor;             /* 色 (バックグラウンド) */
 
 int Synchronous = False;
+
+int tickcounts = 0;
+double random_number = 0.5;
+
 /* Types of animals */
 #define BITMAPTYPES 6
 typedef struct _AnimalDefaults {
@@ -629,7 +635,7 @@ InitScreen(char *DisplayName)
                &BorderWidth, &theDepth);
 
   SetupColors();
-  MakeMouseCursor();
+  // MakeMouseCursor();
 
   if (ToWindow && theTarget == None) {
     if (TargetName != NULL) {
@@ -1022,14 +1028,22 @@ CalcDxDy()
           && theTargetAttributes.y < (int)WindowHeight
           && theTargetAttributes.map_state == IsViewable) {
         if (ToFocus) {
-          if (MouseX < theTargetAttributes.x+BITMAP_WIDTH/2)
-            LargeX = (double)(theTargetAttributes.x + XOffset - NekoX);
-          else if (MouseX > theTargetAttributes.x+theTargetAttributes.width
+          if (tickcounts == 100) {
+            random_number = (double) rand() / RAND_MAX;
+            tickcounts = 0;
+          } else {
+            tickcounts++;
+          }
+          
+          if (NekoX < theTargetAttributes.x+BITMAP_WIDTH/2)
+            LargeX = (double)(theTargetAttributes.x + theTargetAttributes.width + XOffset - NekoX);
+          else if (NekoX > theTargetAttributes.x+theTargetAttributes.width
                    -BITMAP_WIDTH/2)
             LargeX = (double)(theTargetAttributes.x + theTargetAttributes.width
                               + XOffset - NekoX - BITMAP_WIDTH);
           else
-            LargeX = (double)(MouseX - NekoX - BITMAP_WIDTH / 2);
+            LargeX = (double)(theTargetAttributes.x + theTargetAttributes.width * random_number
+                              + XOffset - NekoX - BITMAP_WIDTH);
 
           LargeY = (double)(theTargetAttributes.y
                             + YOffset - NekoY - BITMAP_HEIGHT);
@@ -1534,14 +1548,14 @@ main(int argc, char *argv[])
   InitScreen(theDisplayName);
 
   signal(SIGALRM, NullFunction);
-  signal(SIGINT, RestoreCursor);
-  signal(SIGTERM, RestoreCursor);
-  signal(SIGQUIT, RestoreCursor);
+  // signal(SIGINT, RestoreCursor);
+  // signal(SIGTERM, RestoreCursor);
+  // signal(SIGQUIT, RestoreCursor);
 
   SinPiPer8Times3 = sin(PI_PER8 * (double)3);
   SinPiPer8 = sin(PI_PER8);
 
   ProcessNeko();
 
-  RestoreCursor();
+  // RestoreCursor();
 }
