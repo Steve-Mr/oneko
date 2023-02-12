@@ -74,6 +74,8 @@ double  NekoSpeed = (double)0;          /*   speed      */
 int     IdleSpace = 0;                  /*   idle       */
 int     NekoMoyou = NOTDEFINED;         /*   tora       */
 int     NoShape = NOTDEFINED;           /*   noshape    */
+int     NoCursor = NOTDEFINED;          /*   nocursor   */
+int     FixRootCursor = NOTDEFINED;
 int     ReverseVideo = NOTDEFINED;      /*   reverse    */
 int     ToWindow = NOTDEFINED;          /*   towindow   */
 int     ToFocus = NOTDEFINED;           /*   tofocus    */
@@ -393,6 +395,18 @@ GetResources()
     }
   }
 
+  if (NoCursor == NOTDEFINED) {
+    if ((resource = NekoGetDefault("nocursor")) != NULL) {
+      NoCursor = IsTrue(resource);
+    }
+  }
+
+  if (FixRootCursor == NOTDEFINED) {
+    if ((resource = NekoGetDefault("fixrootcursor")) != NULL) {
+        FixRootCursor = IsTrue(resource);
+    }
+  }
+
   if (ReverseVideo == NOTDEFINED) {
     if ((resource = NekoGetDefault("reverse")) != NULL) {
       ReverseVideo = IsTrue(resource);
@@ -430,6 +444,12 @@ GetResources()
   }
   if (ToFocus == NOTDEFINED) {
     ToFocus = False;
+  }
+  if (NoCursor == NOTDEFINED) {
+      NoCursor = False;
+  }
+  if (FixRootCursor == NOTDEFINED) {
+      FixRootCursor = False;
   }
 }
 
@@ -512,7 +532,7 @@ SetupColors()
 Window SelectWindow(Display *dpy)
 {
   int status;
-  Cursor cursor;
+  Cursor cursor = None;
   XEvent event;
   Window target_win = None, root = theRoot;
   int buttons = 0;
@@ -635,7 +655,9 @@ InitScreen(char *DisplayName)
                &BorderWidth, &theDepth);
 
   SetupColors();
-  // MakeMouseCursor();
+  if (NoCursor == False) {
+    MakeMouseCursor();
+  }
 
   if (ToWindow && theTarget == None) {
     if (TargetName != NULL) {
@@ -677,7 +699,10 @@ InitScreen(char *DisplayName)
   }
 
   theWindowAttributes.background_pixel = theBackgroundColor.pixel;
-  theWindowAttributes.cursor = theCursor;
+  if (NoCursor == False) {
+    printf("Setting cursor...\n");
+    theWindowAttributes.cursor = theCursor;
+  }
   theWindowAttributes.override_redirect = True;
 
   if (!ToWindow) XChangeWindowAttributes(theDisplay, theRoot, CWCursor,
@@ -699,6 +724,11 @@ InitScreen(char *DisplayName)
                ExposureMask|VisibilityChangeMask|KeyPressMask);
 
   XFlush(theDisplay);
+  if (FixRootCursor == True)
+  {
+      system("xsetroot -cursor_name left_ptr") ;
+  }
+
 }
 
 
@@ -709,6 +739,7 @@ InitScreen(char *DisplayName)
 void
 RestoreCursor()
 {
+  Cursor cursor;
   XSetWindowAttributes  theWindowAttributes;
   BitmapGCData *BitmapGCDataTablePtr;
 
@@ -724,6 +755,10 @@ RestoreCursor()
        }
   XFreeCursor(theDisplay,theCursor);
   XCloseDisplay(theDisplay);
+  if (FixRootCursor)
+  {
+      system("xsetroot -cursor_name left_ptr") ;
+  }
   exit(0);
 }
 
@@ -1373,6 +1408,8 @@ char    *message[] = {
 "-position <geometry>   : adjust position relative to mouse pointer.",
 "-debug                 : puts you in synchronous mode.",
 "-patchlevel            : print out your current patchlevel.",
+"-nocursor              : don't change the mouse cursor",
+"-fixrootcursor         : reset the cursor of the root window. Useful for tiling window managers. You need xsetroot installed",
 NULL };
 
 void
@@ -1496,6 +1533,12 @@ GetArguments(int argc, char *argv[], char *theDisplayName)
       unsigned int width, height;
       XParseGeometry(argv[ArgCounter],&XOffset,&YOffset,&width,&height);
       // FIXME: unused
+    }
+    else if (strcmp(argv[ArgCounter], "-nocursor") == 0) {
+        NoCursor = True;
+    }
+    else if (strcmp(argv[ArgCounter], "-fixrootcursor") == 0) {
+        FixRootCursor = True;
     }
     else if (strcmp(argv[ArgCounter], "-debug") ==0) {
       Synchronous = True;
