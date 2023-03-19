@@ -35,7 +35,7 @@ int Synchronous = False;
 int tickcounts = 0;
 double random_number = 0.5;
 
-#define NEKO_SLEEP_PROBABILITY 5  /* 猫进入睡眠状态的概率为 1/NEKO_SLEEP_PROBABILITY */
+#define NEKO_SLEEP_PROBABILITY 30  /* 猫进入睡眠状态的概率为 1/NEKO_SLEEP_PROBABILITY */
 
 /* Types of animals */
 #define BITMAPTYPES 6
@@ -883,6 +883,12 @@ NekoDirection()
     double              Length;
     double              SinTheta;
 
+    /* 加入随机数判断，以一定概率进入睡眠状态 */
+    if ((rand() % NEKO_SLEEP_PROBABILITY) == 0) {
+      SetNekoState(NEKO_SLEEP);
+      return;
+    }
+
     if (NekoMoveDx == 0 && NekoMoveDy == 0) {
         NewState = NEKO_STOP;
     } else {
@@ -1203,15 +1209,7 @@ NekoThinkDraw()
         if (NekoStateCount < NEKO_AWAKE_TIME) {
             break;
         }
-         if (IsNekoDontMove()) {
-        SetNekoState(NEKO_JARE);
-    } else {
         NekoDirection();        /* 猫が動く向きを求める */
-        /* 加入随机数判断，以一定概率进入睡眠状态 */
-        if ((rand() % NEKO_SLEEP_PROBABILITY) == 0) {
-            SetNekoState(NEKO_SLEEP);
-        }
-    }
         break;
     case NEKO_U_MOVE:
     case NEKO_D_MOVE:
